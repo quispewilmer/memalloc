@@ -1,5 +1,7 @@
 #include <memalloc.h>
 
+#define BRK_ERROR (int) -1
+
 void *
 malloc (size_t size) 
 {
@@ -9,7 +11,7 @@ malloc (size_t size)
 
     void *actual = sbrk(0);
     void *request = sbrk(size);
-    if (request == (void *) -1)
+    if (request == (void *) BRK_ERROR)
         goto err;
     assert(actual == request); /* Test only */
 
@@ -20,9 +22,9 @@ malloc (size_t size)
 }
 
 void
-free (void *p)
+free (void *addr)
 {
-    brk(p);
+    assert(brk(addr) != BRK_ERROR);
     
     return ;
 }
