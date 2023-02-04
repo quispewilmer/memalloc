@@ -1,14 +1,5 @@
 #include <memalloc.h>
 
-typedef struct header {
-    size_t size;
-    bool is_free;
-    header_t *next;
-} header_t;
-
-#define HEADER_SIZE     sizeof(struct header)
-#define MIN_SIZE        8
-
 void *
 malloc (size_t size) 
 {
@@ -16,6 +7,22 @@ malloc (size_t size)
     if ((int) size < 0)
         goto err;
 
+    void *actual = sbrk(0);
+    void *request = sbrk(size);
+    if (request == (void *) -1)
+        goto err;
+    assert(actual == request); /* Test only */
+
+    return request;
+
     err:
         return NULL;
+}
+
+void
+free (void *p)
+{
+    brk(p);
+    
+    return ;
 }
