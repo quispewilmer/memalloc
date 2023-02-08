@@ -6,7 +6,7 @@ typedef struct header {
     struct header *next;
 } header_t;
 
-#define HEADER_SIZE         sizeof(struct header);
+#define HEADER_SIZE         sizeof(struct header)
 #define BRK_ERROR           -1
 #define MIN_SIZE            8
 
@@ -15,7 +15,14 @@ static header_t *head = NULL;
 header_t *
 find_free_block (size_t size) 
 {
-    
+    header_t *h = head;
+    while (h != NULL) {
+        if (size <= (h->size + HEADER_SIZE) && h->is_free) {
+            return h;
+        }
+        h = h->next;
+    }
+    return NULL;
 }
 
 header_t *
@@ -38,10 +45,15 @@ malloc (size_t size)
     size += HEADER_SIZE;
     if (!head) {
         h = more_memory(size);
-        h->is_free = 1;
+        h->is_free = 0;
         h->size = size;
         h->next = NULL;
+        head = h;
+        return h;
     }
+    h = find_free_block(size);
+    if (h == NULL)
+        h = more_memory(size);
     return h;
 
     err:
