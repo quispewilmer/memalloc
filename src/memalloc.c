@@ -1,9 +1,9 @@
 #include <memalloc.h>
 
 typedef struct header {
-    size_t size;
     int is_free;
-    header_t *next;
+    size_t size;
+    struct header *next;
 } header_t;
 
 #define HEADER_SIZE         sizeof(struct header);
@@ -12,24 +12,37 @@ typedef struct header {
 
 static header_t *head = NULL;
 
-void *
+header_t *
+find_free_block (size_t size) 
+{
+    
+}
+
+header_t *
 more_memory (size_t size) 
 {
-
+    header_t *h = (header_t *) sbrk(size);
+    if (h == (void *) BRK_ERROR) {
+        return 0;
+    }
+    return h;
 }
 
 void * 
 malloc (size_t size) 
 {
+    header_t *h;
     /* Sanitize in case of useless size */
     if ((int) size < 0)
         goto err;
-
     size += HEADER_SIZE;
-    head = find_free_block(size);
     if (!head) {
-        
+        h = more_memory(size);
+        h->is_free = 1;
+        h->size = size;
+        h->next = NULL;
     }
+    return h;
 
     err:
         return NULL;

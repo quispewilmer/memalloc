@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <memalloc.h>
 
 int main() {
     printf("PID is: %d\n", getppid());
