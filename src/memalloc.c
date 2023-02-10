@@ -6,9 +6,9 @@ typedef struct header {
     struct header *next;
 } header_t;
 
-#define HEADER_SIZE         sizeof(struct header)
-#define BRK_ERROR           -1
-#define MIN_SIZE            8
+#define HEADER_SIZE sizeof(struct header)
+#define BRK_ERROR -1
+#define MIN_SIZE 8
 
 static header_t *head = NULL;
 
@@ -25,12 +25,12 @@ find_free_block (size_t size)
     return NULL;
 }
 
-header_t *
+void *
 more_memory (size_t size) 
 {
-    header_t *h = (header_t *) sbrk(size);
+    void *h = sbrk(size);
     if (h == (void *) BRK_ERROR) {
-        return 0;
+        return NULL;
     }
     return h;
 }
@@ -38,22 +38,30 @@ more_memory (size_t size)
 void * 
 malloc (size_t size) 
 {
+    int n;
     header_t *h;
     /* Sanitize in case of useless size */
     if ((int) size < 0)
         goto err;
     size += HEADER_SIZE;
+    n = MIN_SIZE;
+    while (n < size)
+        n <<= 1;
     if (!head) {
-        h = more_memory(size);
+        h = (header_t *) more_memory(n);
         h->is_free = 0;
-        h->size = size;
+        h->size = n - HEADER_SIZE;
         h->next = NULL;
         head = h;
         return h;
     }
     h = find_free_block(size);
-    if (h == NULL)
+    if (h == NULL) {
         h = more_memory(size);
+        if (h == NULL) {
+            goto err;
+        }
+    }
     return h;
 
     err:
