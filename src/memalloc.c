@@ -24,17 +24,13 @@ find_free_block (size_t size)
     return NULL;
 }
 
-header_t *
+void *
 more_memory (size_t size) 
 {
-    header_t *h = (header_t *) sbrk(size);
-    if (h == (void *) BRK_ERROR)
+    void *req = sbrk(size);
+    if (req == (void *) BRK_ERROR)
         return NULL;
-    h->is_free = 0;
-    h->size = size - HEADER_SIZE;
-    h->next = head;
-    head = h;
-    return h;
+    return req;
 }
 
 void * 
@@ -50,6 +46,10 @@ malloc (size_t size)
         h = (header_t *) more_memory(size);
         if (h == NULL)
             goto err;
+        h->is_free = 0;
+        h->size = size - HEADER_SIZE;
+        h->next = head;
+        head = h;
     }
     h->is_free = 0;
     return h;
@@ -59,11 +59,23 @@ malloc (size_t size)
 }
 
 void
-free (void *addr) 
+free (void *ptr) 
 {
-    if (!addr)
+    if (!ptr)
         return ;
-    header_t *h = (header_t *) addr;
+    header_t *h = (header_t *) ptr;
     h->is_free = 1;
     return ;
+}
+
+void *
+realloc (void *ptr, size_t size) 
+{
+    if (!ptr && size <= 0)
+        goto err;
+    header_t *h = (header_t *) ptr;
+    
+
+    err:
+        return NULL;
 }
