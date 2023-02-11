@@ -17,50 +17,39 @@ find_free_block (size_t size)
 {
     header_t *h = head;
     while (h != NULL) {
-        if (size <= (h->size + HEADER_SIZE) && h->is_free) {
+        if (size <= (h->size + HEADER_SIZE) && h->is_free)
             return h;
-        }
         h = h->next;
     }
     return NULL;
 }
 
-void *
+header_t *
 more_memory (size_t size) 
 {
-    void *h = sbrk(size);
-    if (h == (void *) BRK_ERROR) {
+    header_t *h = (header_t *) sbrk(size);
+    if (h == (void *) BRK_ERROR)
         return NULL;
-    }
+    h->is_free = 0;
+    h->size = size - HEADER_SIZE;
+    h->next = head;
+    head = h;
     return h;
 }
 
 void * 
 malloc (size_t size) 
 {
-    int n;
     header_t *h;
     /* Sanitize in case of useless size */
     if ((int) size < 0)
         goto err;
     size += HEADER_SIZE;
-    n = MIN_SIZE;
-    while (n < size)
-        n <<= 1;
-    if (!head) {
-        h = (header_t *) more_memory(n);
-        h->is_free = 0;
-        h->size = n - HEADER_SIZE;
-        h->next = NULL;
-        head = h;
-        return h;
-    }
-    h = find_free_block(size);
+    h = find_free_block(size - HEADER_SIZE);
     if (h == NULL) {
-        h = more_memory(size);
-        if (h == NULL) {
+        h = (header_t *) more_memory(size);
+        if (h == NULL)
             goto err;
-        }
     }
     return h;
 
@@ -69,9 +58,8 @@ malloc (size_t size)
 }
 
 void
-free (void *addr)
+free (void *addr) 
 {
-    assert(brk(addr) != BRK_ERROR);
-    
+
     return ;
 }
