@@ -51,6 +51,7 @@ malloc (size_t size)
         if (h == NULL)
             goto err;
     }
+    h->is_free = 0;
     return h;
 
     err:
@@ -60,6 +61,9 @@ malloc (size_t size)
 void
 free (void *addr) 
 {
-
+    if (!addr)
+        return ;
+    header_t *h = (header_t *) addr;
+    h->is_free = 1;
     return ;
 }

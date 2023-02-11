@@ -10,6 +10,7 @@ int main() {
     printf("The program brk is on: %p\n", sbrk(0));
     void *p3 = malloc(10);
     printf("The program brk is on: %p\n", sbrk(0));
-    
+    free(p2);
+    void *p4 = malloc(10);
     return EXIT_SUCCESS;
 }
