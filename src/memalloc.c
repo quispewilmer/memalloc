@@ -71,10 +71,20 @@ free (void *ptr)
 void *
 realloc (void *ptr, size_t size) 
 {
-    if (!ptr && size <= 0)
-        goto err;
-    header_t *h = (header_t *) ptr;
-    
+    header_t *new_ptr, *old_ptr;
+    if (!ptr)
+        return malloc(size);
+    new_ptr = (header_t *) malloc(size);
+    old_ptr = (header_t *) ptr;
+    size_t old_size = old_ptr->size;
+    if (new_ptr) {
+        memcpy(new_ptr, old_ptr, size < old_size ? size : old_size);
+        new_ptr->is_free = 0;
+        new_ptr->size = size;
+    }
+    if (new_ptr || size == 0)
+        free(old_ptr);
+    return new_ptr;
 
     err:
         return NULL;
